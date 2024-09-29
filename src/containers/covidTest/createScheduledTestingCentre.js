@@ -1,0 +1,164 @@
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Grid, TextField, Autocomplete } from "@mui/material";
+
+import CustomModal from "../../components/modal";
+import { FormWrapper } from "../../components/wrapper";
+import Heading from "../../components/heading";
+import { FormActionButton } from "../../components/button";
+import Loading from "../../components/loading";
+
+import { checkStringValidity } from "../../utils";
+
+import { createScheduledTestCentre } from "../../store/actions";
+
+const CreateScheduledTestingCentre = ({ isOpen, handleClose }) => {
+  const dispatch = useDispatch();
+
+  const [center, setCenter] = useState("");
+  const [selectedCenter, setSelectedCenter] = useState(null);
+  const [isValidCenter, setIsValidCenter] = useState(true);
+  const [dateScheduled, setDateScheduled] = useState("");
+  const [isValidDateScheduled, setIsValidDateScheduled] = useState(true);
+  const [availableCapacity, setAvailableCapacity] = useState("");
+  const [isValidAvailableCapacity, setIsValidAvailableCapacity] =
+    useState(true);
+
+  const { loggedInUser } = useSelector((state) => state.auth);
+  const { isCreatingScheduledTestCentre, testCentres, isGettingTestCentres } =
+    useSelector((state) => state.covidTest);
+
+  const onHandleCenter = (e, newValue) => {
+    setIsValidCenter(true);
+    setSelectedCenter(newValue);
+    setCenter(newValue != null ? newValue.testCentreId : "");
+  };
+
+  const onHandleDateScheduled = (e) => {
+    setIsValidDateScheduled(true);
+    setDateScheduled(e.target.value);
+  };
+
+  const onHandleAvailableCapacity = (e) => {
+    setIsValidAvailableCapacity(true);
+    setAvailableCapacity(e.target.value);
+  };
+
+  const checkValidity = (e) => {
+    e.preventDefault();
+    let isErrorValidation = false;
+
+    if (!checkStringValidity(center)) {
+      setIsValidCenter(false);
+      isErrorValidation = true;
+    }
+    if (!checkStringValidity(dateScheduled)) {
+      setIsValidDateScheduled(false);
+      isErrorValidation = true;
+    }
+    if (!checkStringValidity(availableCapacity)) {
+      setIsValidAvailableCapacity(false);
+      isErrorValidation = true;
+    }
+    if (!isErrorValidation) {
+      handleCreate(e);
+    }
+  };
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    const userData = {
+      scheduledTestCentreId: 0,
+      testCentreId: center,
+      centreName: selectedCenter?.centreName,
+      dateScheduled,
+      timeScheduled: "Forenoon/Afternoon",
+      availableCapacity,
+      createdDate: new Date().toISOString(),
+      createdBy: loggedInUser.userName,
+    };
+
+    dispatch(createScheduledTestCentre(userData, handleClose));
+  };
+
+  const onHandleCancel = () => {
+    handleClose();
+  };
+
+  return (
+    <CustomModal isOpen={isOpen} handleClose={handleClose}>
+      {isGettingTestCentres ? (
+        <Loading />
+      ) : (
+        <FormWrapper onSubmit={checkValidity}>
+          <Grid container spacing={2}>
+            <Grid item sm={12} xs={12}>
+              <Heading title={"Schedule Testing Center"} />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <Autocomplete
+                value={selectedCenter}
+                onChange={onHandleCenter}
+                options={testCentres || []}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    label="Testing Center"
+                    placeholder="Search Testing Center"
+                    variant="outlined"
+                    error={!isValidCenter}
+                    helperText={!isValidCenter && "* Required Field"}
+                  />
+                )}
+                getOptionLabel={(option) => option.centreName || ""}
+              />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField
+                required
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                label={"Date Scheduled"}
+                type="date"
+                value={dateScheduled}
+                onChange={onHandleDateScheduled}
+                error={!isValidDateScheduled}
+                helperText={!isValidDateScheduled && "* Required Field"}
+              />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField
+                disabled
+                fullWidth
+                label={"Time Scheduled"}
+                value={"Forenoon/Afternoon"}
+              />
+            </Grid>
+            <Grid item sm={6} xs={12}>
+              <TextField
+                required
+                fullWidth
+                label={"Available Capacity"}
+                placeholder={"Enter Available Capacity"}
+                inputProps={{ maxLength: 50 }}
+                value={availableCapacity}
+                onChange={onHandleAvailableCapacity}
+                error={!isValidAvailableCapacity}
+                helperText={!isValidAvailableCapacity && "* Required Field"}
+              />
+            </Grid>
+          </Grid>
+          <FormActionButton
+            onCancelClick={onHandleCancel}
+            loading={isCreatingScheduledTestCentre}
+          />
+        </FormWrapper>
+      )}
+    </CustomModal>
+  );
+};
+
+export default CreateScheduledTestingCentre;

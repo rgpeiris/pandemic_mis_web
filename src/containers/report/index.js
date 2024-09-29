@@ -1,0 +1,13 @@
+export { default as ReportManagement } from "./reportManagement";
+export { default as ContactsReports } from "./contactsReports";
+export { default as PatientsReports } from "./patientsReports";
+export { default as TestingReports } from "./testingReports";
+export { default as VaccinationReports } from "./vaccinationReports";
+export { default as CovidContactsReport } from "./covidContactsReport";
+export { default as CovidPatientsReport } from "./covidPatientsReport";
+export { default as TestingCentersReport } from "./testingCentersReport";
+export { default as TestingAppointmentsReport } from "./testingAppointmentsReport";
+export { default as TestingResultsReport } from "./testingResultsReport";
+export { default as VaccinationCentersReport } from "./vaccinationCentersReport";
+export { default as VaccinationAppointmentsReport } from "./vaccinationAppointmentsReport";
+export { default as VaccinationsReport } from "./vaccinationsReport";
